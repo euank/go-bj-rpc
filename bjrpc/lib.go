@@ -10,7 +10,7 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/euank/bj-json-rpc/json-rpc"
+	"github.com/euank/go-bj-rpc/json-rpc"
 )
 
 const DefaultRequestTimeout = 2 * time.Minute

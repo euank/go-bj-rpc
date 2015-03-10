@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/euank/bj-json-rpc/json-rpc"
+	"github.com/euank/go-bj-rpc/json-rpc"
 )
 
 //type requestHandler func(...interface{}) (interface{}, error)
