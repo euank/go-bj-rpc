@@ -122,7 +122,7 @@ func (b *bjRPC) Notify(method string, args ...interface{}) error {
 func (b *bjRPC) handleData(data []byte) {
 	msg := &json_rpc.ServerMessage{}
 	err := json.Unmarshal(data, msg)
-	if err != nil {
+	if err != nil && msg.ServerRequest != nil {
 		if msg.ServerRequest.Id != nil {
 			b.writeResponse(msg.ServerRequest, nil, json_rpc.JsonParseError(err))
 		} else {
@@ -189,22 +189,29 @@ func (b *bjRPC) handleRequest(req *json_rpc.ServerRequest) {
 
 	if !req.IsNotification() {
 		// resp is interface{}, error; need to send it back
-		if len(resp) != 2 {
-			b.writeResponse(req, nil, json_rpc.NewUnretriableError(errors.New("Incorrect return type for server function")))
+		// Permissively allow a response type of just 'interface{}' however for functiosn that never return errors.
+		if len(resp) != 2 && len(resp) != 1 {
+			b.writeResponse(req, nil, json_rpc.NewUnretriableError(errors.New("Incorrect return type for server function; must of have one or two returns")))
 			return
 		}
-		result, err := resp[0], resp[1]
-		erriface := err.Interface()
-		if result.Interface() == nil && erriface == nil {
-			b.writeResponse(req, nil, json_rpc.NewError(errors.New("Server response was a null error and result")))
-			return
+		result := resp[0]
+		var rerr error
+
+		if len(resp) == 2 {
+			err := resp[1]
+			erriface := err.Interface()
+			var ok bool
+			rerr, ok = erriface.(error)
+			if !err.IsNil() && !ok {
+				b.writeResponse(req, nil, json_rpc.NewUnretriableError(errors.New("Incorrect return type for server function; second argument *must* be an error if present")))
+				return
+			}
 		}
-		rerr, ok := erriface.(error)
-		if !ok && erriface != nil {
-			b.writeResponse(req, nil, json_rpc.NewUnretriableError(errors.New("Incorrect return type for server function")))
-			return
+		if rerr != nil {
+			b.writeResponse(req, nil, rerr)
+		} else {
+			b.writeResponse(req, result.Interface(), nil)
 		}
-		b.writeResponse(req, result.Interface(), rerr)
 	}
 }
 

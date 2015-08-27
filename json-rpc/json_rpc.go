@@ -37,8 +37,8 @@ func (msg *ServerMessage) IsResponse() bool {
 type intermediateMessage struct {
 	JSONRPC string           `json:"jsonrpc"`
 	Method  *string          `json:"method"`
-	Result  *json.RawMessage `json:"result"`
-	Error   *RPCError        `json:"error"`
+	Result  *json.RawMessage `json:"result",omitempty`
+	Error   *RPCError        `json:"error",omitempty`
 }
 
 func (msg *ServerMessage) UnmarshalJSON(data []byte) error {
@@ -145,7 +145,7 @@ type ClientResponse struct {
 
 type ServerResponse struct {
 	JSONRPC string           `json:"jsonrpc"`
-	Result  *json.RawMessage `json:"result",omitempty`
+	Result  *json.RawMessage `json:"result",omitempty` // pointer to distinguish presence
 	Error   *RPCError        `json:"error",omitempty`
 	Id      string           `json:"id"`
 }

@@ -41,6 +41,10 @@ func (c *CallResult) As(arg interface{}) error {
 		return c.response.Error
 	}
 
+	if c.response.Result == nil {
+		arg = nil
+		return nil
+	}
 	return json.Unmarshal(*c.response.Result, arg)
 }
 

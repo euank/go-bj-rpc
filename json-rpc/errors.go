@@ -1,12 +1,10 @@
 package json_rpc
 
-import "encoding/json"
-
 // RPCError is the low-level json rpc error object
 type RPCError struct {
-	Code    int             `json:"code"`
-	Message string          `json:"message"`
-	Data    json.RawMessage `json:"data"`
+	Code    int         `json:"code"`
+	Message string      `json:"message"`
+	Data    interface{} `json:"data"`
 }
 
 // NewError creates a simple server error from a given error
